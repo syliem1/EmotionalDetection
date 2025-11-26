@@ -20,6 +20,13 @@ class EmotionDataset(Dataset):
         self.image_col = 'image'
         self.label_col = 'emotion'
 
+        self.data_frame[self.label_col] = self.data_frame[self.label_col].astype(
+            str).str.lower()
+
+        unique_labels = sorted(self.data_frame[self.label_col].unique())
+        self.label_to_int = {label: i for i, label in enumerate(unique_labels)}
+        self.int_to_label = {i: label for i, label in enumerate(unique_labels)}
+
     def __len__(self):
         return len(self.data_frame)
 
@@ -31,13 +38,13 @@ class EmotionDataset(Dataset):
         # convert img to gray scale
         image = Image.open(img_path).convert('L')
 
-        label = self.data_frame.iloc[idx][self.label_col]
-
+        label = self.data_frame.iloc[idx][self.label_col].lower()
+        idx = self.label_to_int[label]
         # apply transform
         if self.transform:
             image = self.transform(image)
 
-        return image, label
+        return image, idx
 
 
 if __name__ == "__main__":
@@ -46,6 +53,7 @@ if __name__ == "__main__":
     data_transform = transforms.Compose([
         transforms.Resize((350, 350)),
         transforms.ToTensor(),
+        transforms.Normalize(mean=[0.5], std=[0.5])
     ])
 
     dataset = EmotionDataset(
@@ -53,6 +61,9 @@ if __name__ == "__main__":
         img_dir='images',
         transform=data_transform
     )
+    # get the amount of unique label
+    print(
+        f'label size(different label):{len(dataset.data_frame['emotion'].unique())}')
 
     dataloader = DataLoader(dataset, batch_size=32, shuffle=True)
 
