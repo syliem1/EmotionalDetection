@@ -13,7 +13,7 @@ class EmotionDataset(Dataset):
             img_dir (string): Directory with all the images.
             transform (callable, optional): Transform to be applied on a sample.
         """
-        self.data_frame = pd.read_csv(csv_file)
+        self.data_frame = csv_file
         self.img_dir = img_dir
         self.transform = transform
 
